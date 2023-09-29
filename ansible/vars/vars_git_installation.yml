@@ -1,0 +1,4 @@
+git_username: "your_username_git"
+git_email: "your_email_git"
+path_gitconfig: "path_user_vm"
+user: "your_user_vm"

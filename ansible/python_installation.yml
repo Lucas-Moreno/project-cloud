@@ -1,0 +1,41 @@
+- name: Mise à jour du gestionnaire de paquets (APT)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_pkg_mgr == 'apt'
+
+- name: Mise à jour du gestionnaire de paquets (DNF)
+  dnf:
+    update_cache: yes
+  when: ansible_pkg_mgr == 'dnf'
+
+- name: Mise à jour du gestionnaire de paquets (YUM)
+  yum:
+    update_cache: yes
+  when: ansible_pkg_mgr == 'yum'
+
+- name: Installation de Python (APT)
+  apt:
+    name: python3
+    state: present
+  when: ansible_pkg_mgr == 'apt'
+
+- name: Installation de Python (DNF)
+  dnf:
+    name: python3
+    state: present
+  when: ansible_pkg_mgr == 'dnf'
+
+- name: Installation de Python (YUM)
+  yum:
+    name: python3
+    state: present
+  when: ansible_pkg_mgr == 'yum'
+
+- name: Vérification de l'installation de Python
+  command: python3 --version
+  register: python_version
+
+- name: Affichage de la version de Python installée
+  debug:
+    var: python_version.stdout

@@ -1,0 +1,38 @@
+- name: Config vm
+  hosts: connectvm
+  become: yes
+  vars_files:
+    - vars/vars_git_installation.yml
+    - vars/vars_run_project.yml
+    - vars/vars_ssh_authorized_keys_vm.yml
+    - vars/vars_npm_nvm.yml
+    - vars/vars_mep.yml
+
+  tasks:
+    - name: Install Python
+      import_tasks: python_installation.yml
+      tags: python
+
+    - name: Install Git
+      import_tasks: git_installation.yml
+      tags: git
+
+    - name: Install Docker
+      import_tasks: docker_installation.yml
+      tags: docker
+
+    - name: Copy ssh key in vm
+      import_tasks: ssh_authorized_keys_vm.yml
+      tags: authorized_key
+
+    - name: Install npm and nvm
+      import_tasks: npm_nvm_installation.yml
+      tags: npm_nvm
+
+    - name: Run project
+      import_tasks: run_project.yml
+      tags: run_project
+
+    - name: Mise en production
+      import_tasks: mep.yml
+      tags: mep

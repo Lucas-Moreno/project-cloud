@@ -1,0 +1,61 @@
+name: Docker Image CI Back
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "back/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      TAG_DOCKER: $(curl -s https://registry.hub.docker.com/v2/repositories/lucasepitech/back/tags/?page_size=1 | jq -r '.results[].name')
+      DOCKER_USER: lucasepitech
+      DOCKER_PASSWORD: lucasepitech123
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # - name: Install Ansible
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y ansible
+
+      # - name: docker login
+      #   run: |
+      #     docker login -u ${{ env.DOCKER_USER }} -p ${{ env.DOCKER_PASSWORD }}
+
+      # - name: Incrémenter le tag Docker develop
+      #   if: github.ref == 'refs/heads/develop'
+      #   id: increment_tag_develop
+      #   run: |
+      #     INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
+      #     echo "::set-output name=incremented-tag::$INCREMENT_TAG"
+
+      # - name: Incrémenter le tag Docker main
+      #   if: github.ref == 'refs/heads/main'
+      #   id: increment_tag_main
+      #   run: |
+      #     INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
+      #     echo "::set-output name=incremented-tag::$INCREMENT_TAG"
+
+      # - name: docker build
+      #   run: |
+      #     cd back
+      #     docker build . --tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+
+      # - name: docker tag
+      #   run: docker tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }} ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+
+      # - name: docker push
+      #   run: docker push ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+
+      # - name: mep pull
+      #   run: ansible-playbook -i ansible/inventory/inventory.ini ansible/main_installation.yml --tags mep
+
+      - name: mep script
+        run: ./scripts/tag_docker.sh

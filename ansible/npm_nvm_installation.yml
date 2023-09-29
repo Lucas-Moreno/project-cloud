@@ -1,0 +1,53 @@
+- name: Update package cache
+  apt:
+    update_cache: yes
+
+- name: Download and install NVM for debian
+  become: yes
+  become_user: "{{ user_vm }}"
+  shell: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash"
+  args:
+    executable: /bin/bash
+  environment:
+    HOME: "{{ path_root_vm }}"
+
+- name: Configure NVM environment for debian
+  shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    echo 'source "$NVM_DIR/nvm.sh"' >> ~/.bashrc  # Ajouter cette ligne au fichier ~/.bashrc
+  args:
+    executable: /bin/bash
+  become_user: "{{ user_vm }}"
+  environment:
+    HOME: "{{ path_root_vm }}"
+
+- name: Change Node.js version for debian
+  shell: |
+    source "{{ path_root_vm }}/.nvm/nvm.sh"
+    nvm install 18.17.1
+    nvm use 18.17.1
+    source ~/.bashrc
+  args:
+    executable: /bin/bash
+  become_user: "{{ user_vm }}"
+  environment:
+    HOME: "{{ path_root_vm }}"
+
+- name: Install npm
+  apt:
+    name: npm
+    state: present
+
+- name: Install typescript
+  npm:
+    name: typescript
+    global: yes
+    state: present
+
+- name: Install ts-node globally
+  npm:
+    name: ts-node
+    global: yes
+    state: present

@@ -1,0 +1,30 @@
+- name: Récupérer le tag Docker pour TAG_BACK
+  shell: >
+    curl -s https://registry.hub.docker.com/v2/repositories/lucasepitech/back/tags/\?page_size=1 |
+    grep -o '"name":"[^"]*' |
+    cut -d'"' -f4
+  register: tag_back_result
+
+- name: Récupérer le tag Docker pour TAG_FRONT
+  shell: >
+    curl -s https://registry.hub.docker.com/v2/repositories/lucasepitech/front/tags/\?page_size=1 |
+    grep -o '"name":"[^"]*' |
+    cut -d'"' -f4
+  register: tag_front_result
+
+- name: Mettre à jour les tags dans le fichier .env
+  lineinfile:
+    path: /home/debian/T-CLO-901-TLS_5/.env
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - { regexp: "^TAG_BACK=", line: "TAG_BACK={{ tag_back_result.stdout }}" }
+    - { regexp: "^TAG_FRONT=", line: "TAG_FRONT={{ tag_front_result.stdout }}" }
+
+- name: Stop Docker Compose services
+  command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} down
+  become_user: "{{ user_vm }}"
+
+- name: Start Docker Compose services
+  command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} up -d
+  become_user: "{{ user_vm }}"

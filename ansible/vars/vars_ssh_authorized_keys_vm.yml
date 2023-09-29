@@ -1,0 +1,5 @@
+ip_address: your_ip_address_vm
+path_sshkey_pub: "your_path_key_ssh_pub_host"
+path_sshkey_private: "your_path_key_ssh_private_host"
+path_authorized_key_vm: "your_path_authorized_keys_vm"
+user_vm: "your_user_vm"

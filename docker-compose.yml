@@ -1,0 +1,25 @@
+version: "3"
+services:
+  service-back:
+    image: lucasepitech/back:${TAG_BACK}
+    container_name: service-back
+    env_file: .env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    networks:
+      - webgateway
+
+  service-front:
+    image: lucasepitech/front:${TAG_FRONT}
+    container_name: service-front
+    env_file: .env
+    ports:
+      - "3000:3000"
+    networks:
+      - webgateway
+
+networks:
+  webgateway:
+    driver: bridge

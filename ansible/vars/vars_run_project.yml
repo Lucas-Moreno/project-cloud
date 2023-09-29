@@ -1,0 +1,6 @@
+name_of_folder_repo_github: "folder_project_vm"
+path_repo_github: "url_repo_github"
+vm_user: "user_vm"
+path_clone_project_in_vm: "/home/{{ vm_user }}/{{ name_of_folder_repo_github }}"
+path_clone_project_in_vm_with_docker_compose_yml: "/home/{{ vm_user }}/{{ name_of_folder_repo_github }}/docker-compose.yml"
+path_env: "path_.env_host"

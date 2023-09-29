@@ -1,0 +1,45 @@
+- name: Vérifier que Git est installé
+  become: yes
+  stat:
+    path: /usr/bin/git
+  register: git_status
+
+- name: Installer Git
+  become: yes
+  apt:
+    name: git
+    state: present
+  when: not git_status.stat.exists
+
+- name: Vérifier si le fichier ~/.gitconfig existe
+  stat:
+    path: "{{ path_gitconfig }}"
+  register: gitconfig_file
+
+- name: Créer le fichier ~/.gitconfig s'il n'existe pas
+  become: yes
+  copy:
+    content: ""
+    dest: "{{ path_gitconfig }}"
+    force: false
+    group: sys
+    owner: root
+    mode: "0777"
+  when: not gitconfig_file.stat.exists
+  register: gitconfig_created
+
+- name: Set Git user name
+  become: yes
+  become_user: "{{ user }}"
+  git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_username }}"
+
+- name: Set Git user email
+  become: yes
+  become_user: "{{ user }}"
+  git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_email }}"

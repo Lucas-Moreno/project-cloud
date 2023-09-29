@@ -1,0 +1,13 @@
+- name: Copier la clé publique SSH dans le dossier authorized_keys
+  authorized_key:
+    user: "{{ user_vm }}"
+    key: "{{ lookup('file', path_sshkey_pub) }}"
+    path: "{{ path_authorized_key_vm }}"
+    state: present
+
+- name: Importer la clé privée SSH dans le répertoire .ssh de la VM
+  copy:
+    src: "{{ path_sshkey_private }}"
+    dest: "~/.ssh/id_rsa"
+    mode: "0600"
+  become_user: "{{ user_vm }}"
