@@ -35,7 +35,7 @@ jobs:
       - name: Configurer la clé SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.YOUR_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan 94.23.63.215 >> ~/.ssh/known_hosts
         env:
