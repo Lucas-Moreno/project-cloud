@@ -12,9 +12,9 @@
     cut -d'"' -f4
   register: tag_front_result
 
-- name: Mettre à jour les tags dans le fichier .env
+- name: Mettre à jour les tags dans le fichier .tag.env
   lineinfile:
-    path: /home/debian/T-CLO-901-TLS_5/.env
+    path: /home/debian/T-CLO-901-TLS_5/.tag.env
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   loop:
@@ -26,5 +26,6 @@
   become_user: "{{ user_vm }}"
 
 - name: Start Docker Compose services
-  command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} up -d
+  command: |
+    sudo bash -c 'export TAG_BACK={{ tag_back_result.stdout }} && export TAG_FRONT={{ tag_front_result.stdout }} && docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} up -d'
   become_user: "{{ user_vm }}"
