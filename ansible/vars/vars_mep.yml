@@ -1,3 +1,3 @@
-user_vm: user_in_vm
-path_project_vm: path_project_in_folder
-path_repo_github: repo_github_url
+user_vm: debian
+path_clone_project_in_vm_with_docker_compose_yml: "/home/{{ user_vm }}/{{ name_of_folder_repo_github }}/docker-compose.yml"
+name_of_folder_repo_github: "project-cloud"
