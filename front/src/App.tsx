@@ -16,7 +16,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React test deploiement foezijofiz
+          Learn React gigi
         </a>
       </header>
     </div>

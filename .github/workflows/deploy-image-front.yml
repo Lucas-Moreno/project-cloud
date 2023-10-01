@@ -1,10 +1,6 @@
 name: Docker Image CI Front
 
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
     branches:
       - main
@@ -36,21 +32,15 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         id: increment_tag_develop
         run: |
-          INCREMENT_TAG=$(echo ${{ secrets.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
+          INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
           echo "::set-output name=incremented-tag::$INCREMENT_TAG"
-
-      - name: Display Tag Value
-        run: echo ${{ secrets.TAG_DOCKER }}
 
       - name: Incrémenter le tag Docker main
         if: github.ref == 'refs/heads/main'
         id: increment_tag_main
         run: |
-          INCREMENT_TAG=$(echo ${{ secrets.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
+          INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
           echo "::set-output name=incremented-tag::$INCREMENT_TAG"
-
-      - name: Display Tag Value
-        run: echo "${{ steps.increment_tag_main.outputs.incremented-tag }}"
 
       - name: docker build
         run: |
