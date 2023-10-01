@@ -12,15 +12,6 @@
     cut -d'"' -f4
   register: tag_front_result
 
-# - name: Mettre à jour les tags dans le fichier .tag.env
-#   lineinfile:
-#     path: /home/debian/T-CLO-901-TLS_5/.tag.env
-#     regexp: "{{ item.regexp }}"
-#     line: "{{ item.line }}"
-#   loop:
-#     - { regexp: "^TAG_BACK=", line: "TAG_BACK={{ tag_back_result.stdout }}" }
-#     - { regexp: "^TAG_FRONT=", line: "TAG_FRONT={{ tag_front_result.stdout }}" }
-
 - name: Stop Docker Compose services
   command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} down --remove-orphans
   become_user: "{{ user_vm }}"
