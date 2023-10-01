@@ -20,6 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install Ansible
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
       - name: docker login
         run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
@@ -48,3 +54,31 @@ jobs:
 
       - name: docker push
         run: docker push ${{env.DOCKER_USER}}/front:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+
+      - name: Remplacer les valeurs dans inventory.ini
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sed -i 's#address_ip#94.23.63.215#g' ansible/inventory/inventory.ini
+          sed -i 's#user_vm#debian#g' ansible/inventory/inventory.ini
+          sed -i 's#ansible_ssh_pass#epitech123#g' ansible/inventory/inventory.ini
+
+      - name: Remplacer les valeurs dans vars_mep.yml
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sed -i 's#user_in_vm#debian#g' ansible/vars/vars_mep.yml
+          sed -i 's#path_project_in_folder#/home/debian/T-CLO-901-TLS_5#g' ansible/vars/vars_mep.yml
+          sed -i 's#repo_github_url#git@github.com:EpitechMscProPromo2024/T-CLO-901-TLS_5.git#g' ansible/vars/vars_mep.yml
+
+      - name: Configurer la clé SSH
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 94.23.63.215 >> ~/.ssh/known_hosts
+        env:
+          SSH_AUTH_SOCK: /dev/null
+
+      - name: mep
+        if: github.ref == 'refs/heads/main'
+        run: ansible-playbook -i ansible/inventory/inventory.ini ansible/main_installation.yml --tags mep

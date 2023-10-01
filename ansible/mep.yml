@@ -22,7 +22,7 @@
 #     - { regexp: "^TAG_FRONT=", line: "TAG_FRONT={{ tag_front_result.stdout }}" }
 
 - name: Stop Docker Compose services
-  command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} down
+  command: sudo docker-compose -f {{ path_clone_project_in_vm_with_docker_compose_yml }} down --remove-orphans
   become_user: "{{ user_vm }}"
 
 - name: Start Docker Compose services
