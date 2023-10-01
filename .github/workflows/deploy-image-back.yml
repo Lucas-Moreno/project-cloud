@@ -7,12 +7,6 @@ on:
       - develop
     paths:
       - "back/**"
-  pull_request:
-    branches:
-      - main
-      - develop
-    paths:
-      - "back/**"
 
 jobs:
   build:
@@ -20,48 +14,68 @@ jobs:
 
     env:
       TAG_DOCKER: $(curl -s https://registry.hub.docker.com/v2/repositories/lucasepitech/back/tags/?page_size=1 | jq -r '.results[].name')
-      DOCKER_USER: lucasepitech
-      DOCKER_PASSWORD: lucasepitech123
 
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Install Ansible
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y ansible
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
 
-      # - name: docker login
-      #   run: |
-      #     docker login -u ${{ env.DOCKER_USER }} -p ${{ env.DOCKER_PASSWORD }}
+      - name: docker login
+        run: |
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      # - name: Incrémenter le tag Docker develop
-      #   if: github.ref == 'refs/heads/develop'
-      #   id: increment_tag_develop
-      #   run: |
-      #     INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
-      #     echo "::set-output name=incremented-tag::$INCREMENT_TAG"
+      - name: Incrémenter le tag Docker develop
+        if: github.ref == 'refs/heads/develop'
+        id: increment_tag_develop
+        run: |
+          INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
+          echo "::set-output name=incremented-tag::$INCREMENT_TAG"
 
-      # - name: Incrémenter le tag Docker main
-      #   if: github.ref == 'refs/heads/main'
-      #   id: increment_tag_main
-      #   run: |
-      #     INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
-      #     echo "::set-output name=incremented-tag::$INCREMENT_TAG"
+      - name: Incrémenter le tag Docker main
+        if: github.ref == 'refs/heads/main'
+        id: increment_tag_main
+        run: |
+          INCREMENT_TAG=$(echo ${{ env.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
+          echo "::set-output name=incremented-tag::$INCREMENT_TAG"
 
-      # - name: docker build
-      #   run: |
-      #     cd back
-      #     docker build . --tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+      - name: docker build
+        run: |
+          cd back
+          docker build . --tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
 
-      # - name: docker tag
-      #   run: docker tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }} ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+      - name: docker tag
+        run: docker tag ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }} ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
 
-      # - name: docker push
-      #   run: docker push ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
+      - name: docker push
+        run: docker push ${{env.DOCKER_USER}}/back:${{ steps.increment_tag_main.outputs.incremented-tag || steps.increment_tag_develop.outputs.incremented-tag }}
 
-      # - name: mep pull
-      #   run: ansible-playbook -i ansible/inventory/inventory.ini ansible/main_installation.yml --tags mep
+      - name: Remplacer les valeurs dans inventory.ini
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sed -i 's#address_ip#${{secrets.ADDRESS_IP}}#g' ansible/inventory/inventory.ini
+          sed -i 's#user_vm#${{secrets.USER_VM}}#g' ansible/inventory/inventory.ini
+          sed -i 's#ansible_ssh_pass#${{secrets.PASSWORD_VM}}#g' ansible/inventory/inventory.ini
 
-      - name: mep script
-        run: ./scripts/tag_docker.sh
+      - name: Remplacer les valeurs dans vars_mep.yml
+        if: github.ref == 'refs/heads/main'
+        run: |
+          sed -i 's#user_in_vm#${{secrets.USER_VM}}#g' ansible/vars/vars_mep.yml
+          sed -i 's#path_project_in_folder#/home/${{secrets.USER_VM}}/T-CLO-901-TLS_5#g' ansible/vars/vars_mep.yml
+          sed -i 's#repo_github_url#git@github.com:EpitechMscProPromo2024/T-CLO-901-TLS_5.git#g' ansible/vars/vars_mep.yml
+
+      - name: Configurer la clé SSH
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 94.23.63.215 >> ~/.ssh/known_hosts
+        env:
+          SSH_AUTH_SOCK: /dev/null
+
+      - name: mep
+        if: github.ref == 'refs/heads/main'
+        run: ansible-playbook -i ansible/inventory/inventory.ini ansible/main_installation.yml --tags mep
