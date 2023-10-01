@@ -39,6 +39,9 @@ jobs:
           INCREMENT_TAG=$(echo ${{ secrets.TAG_DOCKER }} | awk -F. -v OFS=. '{$NF++; print}')
           echo "::set-output name=incremented-tag::$INCREMENT_TAG"
 
+      - name: Display Tag Value
+        run: echo ${{ secrets.TAG_DOCKER }}
+
       - name: Incrémenter le tag Docker main
         if: github.ref == 'refs/heads/main'
         id: increment_tag_main
