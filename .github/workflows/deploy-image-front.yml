@@ -7,6 +7,12 @@ on:
       - develop
     paths:
       - "front/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "front/**"
 
 jobs:
   build:
