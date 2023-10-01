@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - develop
+  pull_request:
+    branches:
+      - main
+      - develop
     paths:
       - "front/**"
   pull_request:
@@ -47,6 +51,9 @@ jobs:
         run: |
           INCREMENT_TAG=$(echo ${{ secrets.TAG_DOCKER }} | awk -F. -v OFS=. '{$2++; $3=0; print}')
           echo "::set-output name=incremented-tag::$INCREMENT_TAG"
+
+      - name: Display Tag Value
+        run: echo "Tag Value: ${{ steps.increment_tag_main.outputs.incremented-tag }}"
 
       - name: docker build
         run: |
